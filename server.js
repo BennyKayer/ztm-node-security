@@ -2,10 +2,15 @@ const fs = require("fs")
 const https = require("https")
 const path = require("path")
 const express = require("express")
+const helmet = require('helmet')
 
 const PORT = 8010;
 
 const app = express();
+
+// Helmet goes at the top
+// it adds a ton of security headers
+app.use(helmet())
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"))
