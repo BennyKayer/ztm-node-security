@@ -4,13 +4,45 @@ const path = require("path")
 const express = require("express")
 const helmet = require('helmet')
 
-const PORT = 8010;
+require("dotenv").config();
 
-const app = express();
+const ENVS = {
+    gglClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    gglClientId: process.env.GOOGLE_CLIENT_ID
+}
+
+const PORT = 8010
+
+const app = express()
+
+function checkLoggedIn(req, res, next) {
+    const isLoggedIn = true;
+    if (!isLoggedIn) {
+        return res.status(401).json({error: "You must log in!"})
+    }
+    next()
+}
 
 // Helmet goes at the top
 // it adds a ton of security headers
 app.use(helmet())
+
+app.get("/auth/google", (req, res) => {
+
+})
+
+app.get("/auth/google/callback", (req, res) => {
+
+})
+
+app.get("/auth/logout", (req, res) => {
+
+})
+
+// app.get("/secret", checkLoggedIn, checkPermissions, (req, res) => {
+app.get("/secret", checkLoggedIn, (req, res) => {
+    return res.send("Your personal secret is 42")
+})
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"))
