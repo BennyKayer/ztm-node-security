@@ -87,7 +87,8 @@ app.get("/auth/google/callback", passport.authenticate('google',
 // }))
 
 app.get("/auth/logout", (req, res) => {
-
+    req.logout(); // removes req.user, clears session
+    return res.redirect('/')
 })
 
 app.get('/failure', (req, res) => {
