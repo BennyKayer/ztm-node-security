@@ -6,17 +6,8 @@ const helmet = require('helmet')
 const passport = require("passport")
 const { Strategy } = require("passport-google-oauth20")
 const cookieSession = require("cookie-session")
-
-require("dotenv").config();
-
-const ENVS = {
-    gglClientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    gglClientId: process.env.GOOGLE_CLIENT_ID,
-    sessionSecret1: process.env.SESSION_SECRET_1,
-    sessionSecret2: process.env.SESSION_SECRET_2
-}
-
-const PORT = 8010
+const { httpGoogleAuthCallback, httpGoogleAuth } = require("./auth")
+const { ENVS } = require("./configs")
 
 function verifyCallback(accessToken, refreshToken, profile, done) {
     // Save the user that's come back from google to db here
@@ -27,12 +18,12 @@ function verifyCallback(accessToken, refreshToken, profile, done) {
 passport.use(new Strategy({
     clientID: ENVS.gglClientId,
     clientSecret: ENVS.gglClientSecret,
-    callbackURL: "https://localhost:8010/auth/google/callback"
+    callbackURL: ENVS.gglRedirectUrl
 }, verifyCallback));
 
 // Save the session to the cookies
 passport.serializeUser((user, done) => {
-    // Sending the whole user makes cookies big
+    // Sending the whole user makes cookies bisg
     // just get the id and search in deserialize
     done(null, user.id)
 })
@@ -70,14 +61,8 @@ app.use(cookieSession({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/auth/google", passport.authenticate('google', {
-    scope: ["email", "profile", "https://www.googleapis.com/auth/calendar"]
-}))
-
-app.get("/auth/google/callback", passport.authenticate('google', 
-{
-    failureRedirect: "/failure", successRedirect: "/", session: true,
-}))
+app.get("/auth/google", httpGoogleAuth)
+app.get("/auth/google/callback", httpGoogleAuthCallback)
 // Can handle this manually with the next param
 // app.get("/auth/google/callback", passport.authenticate('google', 
 // {
@@ -111,6 +96,6 @@ app.get("/", (req, res) => {
 https.createServer({
     cert: fs.readFileSync("cert.pem"),
     key: fs.readFileSync("key.pem"),
-}, app).listen(PORT, () => {
-    console.log(`Listening on port ${PORT}...`);
+}, app).listen(ENVS.port, () => {
+    console.log(`Listening on port ${ENVS.port}...`);
 })
