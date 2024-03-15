@@ -7,6 +7,7 @@ const ENVS = {
     sessionSecret1: process.env.SESSION_SECRET_1,
     sessionSecret2: process.env.SESSION_SECRET_2,
     port: process.env.PORT,
+    isProduction: process.env.NODE_ENV ? process.env.NODE_ENV === "production" : false
 }
 
 module.exports = {
